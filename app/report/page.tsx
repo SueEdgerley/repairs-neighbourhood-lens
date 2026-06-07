@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { IssueCard } from "@/components/IssueCard";
+import { PhotoUpload, type UploadedPhoto } from "@/components/PhotoUpload";
 import { ISSUE_OPTIONS, type IssueType, getIssueLabel } from "@/lib/issues";
 
 type FormState = {
@@ -29,6 +30,8 @@ const fieldClassName =
 
 export default function ReportPage() {
   const [form, setForm] = useState<FormState>(initialFormState);
+  const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
+  const [photoError, setPhotoError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [issueError, setIssueError] = useState("");
   const [submitError, setSubmitError] = useState("");
@@ -39,6 +42,14 @@ export default function ReportPage() {
     if (key === "issueType") {
       setIssueError("");
     }
+  }
+
+  function resetForm() {
+    setSubmitted(false);
+    setSubmitError("");
+    setPhotoError("");
+    setForm(initialFormState);
+    setPhotos([]);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -65,6 +76,12 @@ export default function ReportPage() {
           contactName: form.contactName,
           contactPhone: form.contactPhone,
           contactEmail: form.contactEmail,
+          photos: photos.map((photo) => ({
+            fileName: photo.fileName,
+            mimeType: photo.mimeType,
+            sizeBytes: photo.sizeBytes,
+            dataBase64: photo.dataBase64,
+          })),
         }),
       });
 
@@ -100,17 +117,18 @@ export default function ReportPage() {
               You told us about:{" "}
               <strong>{getIssueLabel(form.issueType)}</strong>
             </p>
+            {photos.length > 0 && (
+              <p className="mt-2 text-sm text-text-muted">
+                {photos.length} photo{photos.length === 1 ? "" : "s"} included with your report.
+              </p>
+            )}
             <p className="mt-2 text-sm text-text-muted">
               We have saved your report and will review it soon.
             </p>
             <div className="mt-6 flex flex-col gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  setSubmitted(false);
-                  setSubmitError("");
-                  setForm(initialFormState);
-                }}
+                onClick={resetForm}
                 className="flex min-h-12 items-center justify-center rounded-xl border-2 border-council-navy bg-white px-4 py-3 text-base font-semibold text-council-navy hover:bg-slate-50"
               >
                 Report another concern
@@ -139,24 +157,6 @@ export default function ReportPage() {
             a few minutes.
           </p>
         </header>
-
-        {form.issueType === "stitch-in-time" && (
-          <aside
-            aria-labelledby="stitch-info-heading"
-            className="mt-6 rounded-2xl border-2 border-council-teal bg-council-teal-light p-5"
-          >
-            <h2 id="stitch-info-heading" className="text-lg font-bold text-council-navy">
-              Stitch in time
-            </h2>
-            <p className="mt-2 text-base text-text">
-              Tell us about small repair concerns before they become bigger problems.
-            </p>
-            <p className="mt-2 text-sm text-text-muted">
-              Use this for non-urgent early warning issues. If someone is at risk or your home is
-              unsafe, please call our repairs line instead.
-            </p>
-          </aside>
-        )}
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-8" noValidate>
           <fieldset>
@@ -238,6 +238,13 @@ export default function ReportPage() {
               placeholder="For example: a small damp patch appeared on the bedroom ceiling last week."
             />
           </div>
+
+          <PhotoUpload
+            photos={photos}
+            onChange={setPhotos}
+            error={photoError}
+            onError={setPhotoError}
+          />
 
           <fieldset className="space-y-5 rounded-2xl border border-border bg-white p-5">
             <legend className="px-1 text-lg font-bold text-council-navy">Your contact details</legend>

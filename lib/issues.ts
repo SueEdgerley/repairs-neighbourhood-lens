@@ -17,8 +17,8 @@ export type IssueOption = {
 export const ISSUE_OPTIONS: IssueOption[] = [
   {
     id: "stitch-in-time",
-    label: "Stitch in time concern",
-    description: "Small issue that could get worse if left",
+    label: "Stitch in Time",
+    description: "Small repair concern before it becomes a bigger problem",
     icon: "stitch",
   },
   {

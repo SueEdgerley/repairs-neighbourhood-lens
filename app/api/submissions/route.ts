@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
-import { saveSubmission } from "@/lib/db";
+import { saveSubmission, type PhotoDetail } from "@/lib/db";
 import { ISSUE_OPTIONS, type IssueType } from "@/lib/issues";
+
+type SubmissionPhoto = {
+  fileName?: string;
+  mimeType?: string;
+  sizeBytes?: number;
+  dataBase64?: string;
+};
 
 type SubmissionBody = {
   issueType?: string;
@@ -9,9 +16,12 @@ type SubmissionBody = {
   contactName?: string;
   contactPhone?: string;
   contactEmail?: string;
+  photos?: SubmissionPhoto[];
 };
 
 const VALID_ISSUE_TYPES = new Set<string>(ISSUE_OPTIONS.map((option) => option.id));
+const MAX_PHOTOS = 5;
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
 function isValidIssueType(value: string): value is IssueType {
   return VALID_ISSUE_TYPES.has(value);
@@ -29,6 +39,46 @@ function buildContactDetails(body: SubmissionBody): string | null {
   }
 
   return parts.length > 0 ? parts.join("\n") : null;
+}
+
+function normalizePhotos(photos: SubmissionPhoto[] | undefined): PhotoDetail[] | undefined {
+  if (!photos || photos.length === 0) {
+    return undefined;
+  }
+
+  if (photos.length > MAX_PHOTOS) {
+    throw new Error(`You can upload up to ${MAX_PHOTOS} photos.`);
+  }
+
+  const normalized: PhotoDetail[] = [];
+
+  for (const photo of photos) {
+    const fileName = photo.fileName?.trim() ?? "";
+    const mimeType = photo.mimeType?.trim() ?? "";
+    const dataBase64 = photo.dataBase64?.trim() ?? "";
+    const sizeBytes = photo.sizeBytes ?? 0;
+
+    if (!fileName || !mimeType || !dataBase64) {
+      throw new Error("One or more photos are missing required details.");
+    }
+
+    if (!mimeType.startsWith("image/")) {
+      throw new Error("Only image files can be uploaded.");
+    }
+
+    if (sizeBytes > MAX_FILE_SIZE_BYTES) {
+      throw new Error("Each photo must be 5 MB or smaller.");
+    }
+
+    normalized.push({
+      fileName,
+      mimeType,
+      sizeBytes,
+      dataBase64,
+    });
+  }
+
+  return normalized;
 }
 
 function validationError(message: string) {
@@ -64,6 +114,15 @@ export async function POST(request: Request) {
     return validationError("Please describe what is happening.");
   }
 
+  let photoDetails: PhotoDetail[] | undefined;
+
+  try {
+    photoDetails = normalizePhotos(body.photos);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Photo details are not valid.";
+    return validationError(message);
+  }
+
   try {
     const submission = await saveSubmission({
       residentName: body.contactName,
@@ -71,6 +130,7 @@ export async function POST(request: Request) {
       contactDetails: buildContactDetails(body),
       issueType,
       description,
+      photoDetails,
     });
 
     return NextResponse.json(
@@ -80,6 +140,7 @@ export async function POST(request: Request) {
         submission: {
           id: submission.id,
           status: submission.status,
+          photoCount: submission.photo_details?.length ?? 0,
           createdAt: submission.created_at,
         },
       },

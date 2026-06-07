@@ -16,32 +16,6 @@ export default function HomePage() {
           </p>
         </section>
 
-        <section
-          aria-labelledby="stitch-heading"
-          className="mt-8 rounded-2xl border-2 border-council-teal bg-council-teal-light p-5 sm:p-6"
-        >
-          <div className="flex items-start gap-3">
-            <span
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-council-teal text-2xl text-white"
-              aria-hidden="true"
-            >
-              ⏱
-            </span>
-            <div className="space-y-2">
-              <h2 id="stitch-heading" className="text-xl font-bold text-council-navy">
-                Stitch in time
-              </h2>
-              <p className="text-base text-text">
-                Tell us about small repair concerns before they become bigger problems.
-              </p>
-              <p className="text-sm text-text-muted">
-                This is for non-urgent early warning issues — things like a small crack, a dripping
-                tap, or a loose tile. If you have an emergency, call us instead.
-              </p>
-            </div>
-          </div>
-        </section>
-
         <section aria-labelledby="steps-heading" className="mt-8 space-y-4">
           <h2 id="steps-heading" className="text-xl font-bold text-council-navy">
             How it works
@@ -56,7 +30,7 @@ export default function HomePage() {
               {
                 step: "2",
                 title: "Tell us what is happening",
-                detail: "Share a few details so we can understand the problem.",
+                detail: "Share a few details and add photos if you have them.",
               },
               {
                 step: "3",

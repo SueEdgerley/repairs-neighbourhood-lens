@@ -1,5 +1,12 @@
 import { neon } from "@neondatabase/serverless";
 
+export type PhotoDetail = {
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  dataBase64: string;
+};
+
 export type SubmissionRecord = {
   id: string;
   resident_name: string | null;
@@ -7,6 +14,7 @@ export type SubmissionRecord = {
   contact_details: string | null;
   issue_type: string;
   description: string;
+  photo_details: PhotoDetail[] | null;
   status: string;
   created_at: string;
   updated_at: string;
@@ -18,6 +26,7 @@ export type NewSubmission = {
   contactDetails?: string | null;
   issueType: string;
   description: string;
+  photoDetails?: PhotoDetail[];
 };
 
 let schemaReady: Promise<void> | null = null;
@@ -45,10 +54,16 @@ export async function ensureSubmissionsTable() {
           contact_details TEXT,
           issue_type TEXT NOT NULL,
           description TEXT NOT NULL,
+          photo_details JSONB,
           status TEXT NOT NULL DEFAULT 'new',
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
+      `;
+
+      await sql`
+        ALTER TABLE repairs_submissions
+        ADD COLUMN IF NOT EXISTS photo_details JSONB
       `;
     })();
   }
@@ -60,6 +75,11 @@ export async function saveSubmission(input: NewSubmission): Promise<SubmissionRe
   await ensureSubmissionsTable();
 
   const sql = getSql();
+  const photoDetails =
+    input.photoDetails && input.photoDetails.length > 0
+      ? JSON.stringify(input.photoDetails)
+      : null;
+
   const rows = await sql`
     INSERT INTO repairs_submissions (
       resident_name,
@@ -67,6 +87,7 @@ export async function saveSubmission(input: NewSubmission): Promise<SubmissionRe
       contact_details,
       issue_type,
       description,
+      photo_details,
       status,
       updated_at
     )
@@ -76,6 +97,7 @@ export async function saveSubmission(input: NewSubmission): Promise<SubmissionRe
       ${input.contactDetails?.trim() || null},
       ${input.issueType},
       ${input.description.trim()},
+      ${photoDetails}::jsonb,
       'new',
       NOW()
     )
@@ -86,6 +108,7 @@ export async function saveSubmission(input: NewSubmission): Promise<SubmissionRe
       contact_details,
       issue_type,
       description,
+      photo_details,
       status,
       created_at,
       updated_at
