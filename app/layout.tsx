@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Repairs Neighbourhood Lens | Croydon Council",
+  title: "Report a Repair Concern | Croydon Housing",
   description:
-    "Report repair concerns in your home or neighbourhood. Tell us about small issues early with Stitch in time.",
+    "Tell us about a repair problem — incomplete work, recurring issues, poor workmanship, or unresolved repairs.",
 };
 
 export const viewport: Viewport = {
