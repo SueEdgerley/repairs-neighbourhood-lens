@@ -13,7 +13,7 @@ export function SiteHeader({ showBackLink = false, variant = "default" }: SiteHe
         <div className="mx-auto max-w-lg px-4 py-5 sm:px-6">
           <div className="flex justify-center rounded-2xl bg-white px-6 py-4">
             <Link href="/" aria-label="Croydon Housing home" className="no-underline">
-              <CroydonHousingLogo className="h-16 w-auto" />
+              <CroydonHousingLogo className="h-16 w-auto max-w-full" priority />
             </Link>
           </div>
         </div>
