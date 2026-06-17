@@ -1,5 +1,7 @@
-import { neon } from "@neondatabase/serverless";
+import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import type { ConcernSubmission, SavedConcern } from "./types";
+
+type Sql = NeonQueryFunction<false, false>;
 
 function getConnectionString(): string {
   const raw = process.env.DATABASE_URL;
@@ -19,7 +21,7 @@ function getConnectionString(): string {
 
 let schemaReady: Promise<void> | null = null;
 
-function ensureSchema(sql: ReturnType<typeof neon>): Promise<void> {
+function ensureSchema(sql: Sql): Promise<void> {
   if (!schemaReady) {
     schemaReady = (async () => {
       await sql`
