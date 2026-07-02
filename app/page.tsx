@@ -137,12 +137,16 @@ export default function HomePage() {
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-amber-900">
             If you have an urgent repair, such as no heating in cold weather or a
-            major leak, please contact our repairs line straight away.
+            major leak, please call our Repairs Service Team on{" "}
+            <a href="tel:02087266101" className="font-semibold underline">
+              020 8726 6101
+            </a>
+            .
           </p>
           <p className="mt-3 text-sm font-semibold leading-relaxed text-amber-900">
             If you smell gas or think there may be a gas leak, do not use this
-            form — call the National Gas Emergency Service immediately on{" "}
-            <a href="tel:08001111999" className="underline">
+            form. Call the National Gas Emergency Service immediately on{" "}
+            <a href="tel:0800111999" className="underline">
               0800 111 999
             </a>
             .
